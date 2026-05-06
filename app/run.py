@@ -1,3 +1,10 @@
+"""
+Disaster Response Web App
+- Classifies emergency messages using ML
+- Detects language & translates to English
+- Extracts urgency level and locations
+- Visualizes results on an interactive map
+"""
 import json
 import plotly
 import pandas as pd
