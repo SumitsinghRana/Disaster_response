@@ -2,7 +2,6 @@ import json
 import plotly
 import pandas as pd
 
-from utils.translator import detect_and_translate
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
