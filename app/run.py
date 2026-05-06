@@ -2,8 +2,13 @@ import json
 import plotly
 import pandas as pd
 
+from utils.translator import detect_and_translate
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+
+from utils.urgency import get_urgency, extract_locations
+from utils.translator import detect_and_translate
+from utils.map_utils import generate_map
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -97,21 +102,39 @@ def index():
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
 
+@app.route('/map')
+def show_map():
+    return render_template('map.html')
 # web page that handles user query and displays model results
 @app.route('/go')
 def go():
-    # save user input in query
-    query = request.args.get('query', '') 
+    query = request.args.get('query', '')
 
-    # use model to predict classification for query
-    classification_labels = model.predict([query])[0]
+    # translation
+    translated_query, original_lang = detect_and_translate(query)
+
+    # ML prediction
+    classification_labels = model.predict([translated_query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 
-    # This will render the go.html Please see that file. 
+    # urgency
+    urgency_level, urgency_style = get_urgency(translated_query)
+
+    # location extraction
+    locations = extract_locations(translated_query)
+
+    # generate map
+    generate_map(locations, urgency_style)
+
     return render_template(
         'go.html',
         query=query,
-        classification_result=classification_results
+        original_lang=original_lang,
+        translated_query=translated_query,
+        classification_results=classification_results,
+        urgency_level=urgency_level,
+        urgency_style=urgency_style,
+        locations=locations
     )
 
 
